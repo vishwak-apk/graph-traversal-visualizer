@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Graph Traversal Visualizer</title>
+  <meta name="description" content="Build a graph, choose BFS or DFS, and watch every step of the traversal unfold. A DAA learning project powered by Flask.">
+  <script>document.documentElement.classList.add('js');</script>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23234E3D'/%3E%3Cpath d='M9 10l7 4 7-4M16 14v9' stroke='%23FFF9F0' stroke-width='2' fill='none'/%3E%3Ccircle cx='9' cy='10' r='3' fill='%23F2B84B'/%3E%3Ccircle cx='23' cy='10' r='3' fill='%23B9D7C0'/%3E%3Ccircle cx='16' cy='23' r='3' fill='%23F07862'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<a class="skip-link" href="#visualizer">Skip to the visualizer</a>
+
+<!-- ============ A. NAVIGATION ============ -->
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="#top" aria-label="Graph Traversal Visualizer - home">
+      <svg class="brand-logo" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="9" fill="#234E3D"/>
+        <path d="M9 10l7 4 7-4M16 14v9" stroke="#FFF9F0" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <circle cx="9" cy="10" r="3.2" fill="#F2B84B"/><circle cx="23" cy="10" r="3.2" fill="#B9D7C0"/><circle cx="16" cy="23" r="3.2" fill="#F07862"/>
+      </svg>
+      <span>Graph Traversal Visualizer</span>
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Toggle navigation">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="nav-links" id="navLinks" aria-label="Main">
+      <a href="#visualizer">Visualizer</a>
+      <a href="#algorithms">Algorithms</a>
+      <a href="#complexity">Complexity</a>
+      <a href="#about">About</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<!-- ============ B. HERO ============ -->
+<section class="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy reveal">
+      <p class="eyebrow">Design &amp; Analysis of Algorithms</p>
+      <h1>See how algorithms explore a graph.</h1>
+      <p class="lead">Build a graph, choose a traversal algorithm, and watch every step unfold.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary btn-lg" href="#visualizer">Start Exploring</a>
+        <a class="btn btn-secondary btn-lg" href="#algorithms">Explore Algorithms</a>
+      </div>
+      <ul class="hero-legend" aria-label="Colour legend">
+        <li><i class="dot dot-current"></i>Current</li>
+        <li><i class="dot dot-visited"></i>Visited</li>
+        <li><i class="dot dot-pending"></i>Queued / stacked</li>
+        <li><i class="dot dot-edge"></i>Active edge</li>
+      </ul>
+    </div>
+    <div class="hero-art reveal" aria-hidden="true">
+      <svg viewBox="0 0 460 340" role="img" aria-label="A small graph with a highlighted traversal path">
+        <defs>
+          <filter id="heroShadow" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#234E3D" flood-opacity=".18"/></filter>
+        </defs>
+        <g stroke="#D9CFBD" stroke-width="3" stroke-linecap="round">
+          <line x1="80" y1="170" x2="200" y2="70"/><line x1="80" y1="170" x2="200" y2="270"/>
+          <line x1="200" y1="70" x2="330" y2="70"/><line x1="200" y1="70" x2="200" y2="270"/>
+          <line x1="200" y1="270" x2="330" y2="270"/><line x1="330" y1="70" x2="400" y2="170"/>
+          <line x1="330" y1="270" x2="400" y2="170"/><line x1="330" y1="70" x2="330" y2="270"/>
+        </g>
+        <g stroke="#F07862" stroke-width="5" stroke-linecap="round" fill="none">
+          <path class="hero-path" d="M80 170 L200 70 L330 70 L400 170"/>
+        </g>
+        <g filter="url(#heroShadow)" font-family="Manrope, sans-serif" font-weight="800" font-size="19" text-anchor="middle" fill="#292D32">
+          <circle cx="80" cy="170" r="28" fill="#B9D7C0" stroke="#234E3D" stroke-width="2.5"/><text x="80" y="177">A</text>
+          <circle cx="200" cy="70" r="28" fill="#B9D7C0" stroke="#234E3D" stroke-width="2.5"/><text x="200" y="77">B</text>
+          <circle cx="330" cy="70" r="28" fill="#B9D7C0" stroke="#234E3D" stroke-width="2.5"/><text x="330" y="77">C</text>
+          <circle class="hero-current" cx="400" cy="170" r="28" fill="#F2B84B" stroke="#234E3D" stroke-width="2.5"/><text x="400" y="177">D</text>
+          <circle cx="200" cy="270" r="28" fill="#B9A7E8" stroke="#234E3D" stroke-width="2.5"/><text x="200" y="277">E</text>
+          <circle cx="330" cy="270" r="28" fill="#fff" stroke="#234E3D" stroke-width="2.5"/><text x="330" y="277">F</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ============ C. VISUALIZER ============ -->
+<section class="section" id="visualizer" aria-labelledby="vizTitle">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <p class="eyebrow">Interactive visualizer</p>
+        <h2 id="vizTitle">Build, run and replay a traversal</h2>
+      </div>
+      <span class="api-badge" id="apiBadge" data-state="checking" role="status"><i></i><span>Checking API…</span></span>
+    </div>
+
+    <div class="viz-grid">
+      <!-- ---- canvas ---- -->
+      <div class="card canvas-card">
+        <div class="toolbar" role="toolbar" aria-label="Graph editing tools">
+          <div class="tool-group" role="group" aria-label="Mode">
+            <button class="tool is-active" id="toolSelect" type="button" aria-pressed="true" title="Select and drag nodes (V)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 8-6 1.5L10.5 19z" fill="currentColor"/></svg>Select
+            </button>
+            <button class="tool" id="toolEdge" type="button" aria-pressed="false" title="Click two nodes to connect them (E)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="19" r="3" fill="currentColor"/><circle cx="19" cy="5" r="3" fill="currentColor"/><path d="M7 17L17 7" stroke="currentColor" stroke-width="2"/></svg>Add edge
+            </button>
+          </div>
+          <div class="tool-group" role="group" aria-label="Nodes">
+            <button class="tool" id="btnAddNode" type="button" title="Add a node (or double-click the canvas)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="2"/></svg>Add node
+            </button>
+            <button class="tool tool-danger" id="btnDelete" type="button" disabled title="Delete the selected node or edge (Del)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Delete selected
+            </button>
+          </div>
+          <label class="switch" title="Directed edges have arrows">
+            <input type="checkbox" id="directedToggle"><span class="switch-ui" aria-hidden="true"></span><span>Directed</span>
+          </label>
+          <label class="select-wrap">
+            <span class="sr-only">Sample graph</span>
+            <select id="sampleSelect" aria-label="Generate a sample graph">
+              <option value="">Sample graph…</option>
+              <option value="simple">Simple connected graph</option>
+              <option value="branching">Branching graph</option>
+              <option value="cyclic">Cyclic graph</option>
+              <option value="disconnected">Disconnected graph</option>
+            </select>
+          </label>
+          <button class="tool" id="btnClear" type="button">Clear</button>
+          <div class="tool-group zoom" role="group" aria-label="Zoom">
+            <button class="tool icon-only" id="btnZoomOut" type="button" aria-label="Zoom out"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12" stroke="currentColor" stroke-width="2.4"/></svg></button>
+            <button class="tool icon-only" id="btnZoomIn" type="button" aria-label="Zoom in"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12M12 6v12" stroke="currentColor" stroke-width="2.4"/></svg></button>
+            <button class="tool" id="btnFit" type="button" title="Fit the graph in view">Reset view</button>
+          </div>
+        </div>
+
+        <div class="canvas-wrap" id="canvasWrap">
+          <svg id="graphSvg" role="application" aria-label="Graph canvas. Use the tools above to edit the graph."></svg>
+          <div class="canvas-empty" id="canvasEmpty">
+            <svg viewBox="0 0 120 80" aria-hidden="true"><circle cx="25" cy="55" r="12" fill="#fff" stroke="#234E3D" stroke-width="2"/><circle cx="60" cy="20" r="12" fill="#B9D7C0" stroke="#234E3D" stroke-width="2"/><circle cx="96" cy="55" r="12" fill="#fff" stroke="#234E3D" stroke-width="2"/><path d="M33 47L52 28M68 28l20 19" stroke="#234E3D" stroke-width="2" stroke-dasharray="4 4"/></svg>
+            <strong>Your canvas is empty</strong>
+            <span>Press <b>Add node</b>, double-click anywhere, or pick a <b>Sample graph</b>.</span>
+          </div>
+        </div>
+        <p class="canvas-hint" id="canvasHint" aria-live="polite">Drag nodes to move them. Scroll to zoom, drag the background to pan.</p>
+
+        <ul class="legend" aria-label="Node colour legend">
+          <li><i class="swatch sw-unvisited"></i>Unvisited</li>
+          <li><i class="swatch sw-current"></i>Current node</li>
+          <li><i class="swatch sw-visited"></i>Visited</li>
+          <li><i class="swatch sw-pending"></i>Pending (queue / stack)</li>
+          <li><i class="swatch sw-edge"></i>Active edge</li>
+        </ul>
+      </div>
+
+      <!-- ---- side column ---- -->
+      <aside class="side">
+        <div class="card controls">
+          <h3>Traversal setup</h3>
+          <div class="field">
+            <span class="field-label" id="algoLabel">Algorithm</span>
+            <div class="segmented" role="group" aria-labelledby="algoLabel">
+              <button type="button" id="algoBfs" data-algo="bfs" class="is-active" aria-pressed="true">BFS <small>queue</small></button>
+              <button type="button" id="algoDfs" data-algo="dfs" aria-pressed="false">DFS <small>stack</small></button>
+            </div>
+          </div>
+          <div class="field-row">
+            <label class="field">
+              <span class="field-label">Start node</span>
+              <select id="startSelect"></select>
+            </label>
+            <button type="button" class="btn btn-ghost btn-sm" id="btnSetStart" disabled title="Make the selected node the start node">Use selected</button>
+          </div>
+          <div class="field">
+            <label class="switch">
+              <input type="checkbox" id="modeToggle"><span class="switch-ui" aria-hidden="true"></span><span>Traverse entire graph</span>
+            </label>
+            <p class="field-note" id="modeNote"></p>
+          </div>
+          <button class="btn btn-primary btn-block" id="btnRun" type="button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4l13 8-13 8z" fill="currentColor"/></svg><span>Run traversal</span>
+          </button>
+          <div class="status" id="status" role="status" aria-live="polite" data-kind="idle">Build a graph, then press <b>Run traversal</b>. The Flask backend computes every step.</div>
+        </div>
+
+        <div class="card playback" aria-labelledby="pbTitle">
+          <div class="pb-head">
+            <h3 id="pbTitle">Playback</h3>
+            <span class="pill" id="pbAlgo">BFS</span>
+            <span class="pb-step" id="pbStep">Step 0 / 0</span>
+          </div>
+          <div class="progress" role="progressbar" aria-label="Traversal progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="pbProgressBar"><div id="pbProgress"></div></div>
+          <p class="pb-action" id="pbAction" aria-live="polite">Run a traversal to see its steps here.</p>
+
+          <div class="pb-controls" role="group" aria-label="Playback controls">
+            <button class="ctl" id="btnReset" type="button" disabled aria-label="Reset traversal" title="Reset traversal">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5v14M19 5L9 12l10 7z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="ctl" id="btnPrev" type="button" disabled aria-label="Step backward" title="Step backward (←)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-8 7 8 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="ctl ctl-play" id="btnPlay" type="button" disabled aria-label="Play" title="Play / pause">
+              <svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l12 7-12 7z" fill="currentColor"/></svg>
+              <svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></svg>
+            </button>
+            <button class="ctl" id="btnNext" type="button" disabled aria-label="Step forward" title="Step forward (→)">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          <label class="speed">
+            <span>Speed</span>
+            <input type="range" id="speed" min="1" max="10" value="5" aria-describedby="speedLabel">
+            <output id="speedLabel">5×</output>
+          </label>
+
+          <dl class="state-list">
+            <div class="state-row"><dt>Current node</dt><dd id="pbCurrent" class="mono">—</dd></div>
+            <div class="state-row stack"><dt id="pbStructLabel">Queue (front → back)</dt><dd><div class="chips" id="pbStruct"></div></dd></div>
+            <div class="state-row stack"><dt>Visited nodes</dt><dd><div class="chips" id="pbVisited"></div></dd></div>
+            <div class="state-row stack"><dt>Traversal sequence</dt><dd><div class="chips seq" id="pbOrder"></div></dd></div>
+          </dl>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ---- insight cards ---- -->
+    <div class="insight-grid">
+      <div class="card">
+        <h3>Adjacency list</h3>
+        <p class="muted small">The graph is stored this way in the backend: each node maps to its neighbours, ordered by node creation. The current node is highlighted during playback.</p>
+        <div class="adj" id="adjList" aria-live="polite"></div>
+      </div>
+      <div class="card" id="summaryCard">
+        <h3>Traversal result</h3>
+        <div id="summary" class="summary"><p class="empty">No traversal yet. Press <b>Run traversal</b> to see the order, counts and unreachable nodes.</p></div>
+      </div>
+      <div class="card">
+        <h3>BFS vs DFS on this graph</h3>
+        <p class="muted small">Runs both algorithms through the API from the same start node so you can compare the orders. Different positions are outlined.</p>
+        <button class="btn btn-secondary btn-sm" id="btnCompare" type="button">Run both &amp; compare</button>
+        <div id="compareOut" class="compare-out" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ E. ALGORITHM CARDS ============ -->
+<section class="section section-alt" id="algorithms" aria-labelledby="algoTitle">
+  <div class="container">
+    <div class="section-head"><div>
+      <p class="eyebrow">Learn the algorithms</p>
+      <h2 id="algoTitle">Two ways to explore the same graph</h2>
+    </div></div>
+
+    <div class="algo-grid">
+      <article class="card algo-card reveal" id="cardBfs">
+        <header><span class="pill pill-forest">BFS</span><h3>Breadth-First Search</h3></header>
+        <p>Explores the graph <b>level by level</b>: the start node, then all of its neighbours, then all of <em>their</em> neighbours. It uses a <b>queue (FIFO)</b>, so nodes discovered first are processed first.</p>
+        <figure class="mini">
+          <svg viewBox="0 0 300 150" role="img" aria-label="Example graph with BFS visiting order A B C D E F">
+            <g stroke="#CBBFA9" stroke-width="2.5"><line x1="150" y1="25" x2="75" y2="75"/><line x1="150" y1="25" x2="225" y2="75"/><line x1="75" y1="75" x2="35" y2="125"/><line x1="75" y1="75" x2="115" y2="125"/><line x1="225" y1="75" x2="225" y2="125"/></g>
+            <g font-family="Manrope, sans-serif" font-weight="800" font-size="13" text-anchor="middle" fill="#292D32" stroke="#234E3D" stroke-width="2">
+              <circle cx="150" cy="25" r="16" fill="#B9D7C0"/><circle cx="75" cy="75" r="16" fill="#B9D7C0"/><circle cx="225" cy="75" r="16" fill="#B9D7C0"/>
+              <circle cx="35" cy="125" r="16" fill="#B9A7E8"/><circle cx="115" cy="125" r="16" fill="#B9A7E8"/><circle cx="225" cy="125" r="16" fill="#B9A7E8"/>
+            </g>
+            <g font-family="Manrope, sans-serif" font-weight="800" font-size="13" text-anchor="middle" fill="#292D32">
+              <text x="150" y="30">A</text><text x="75" y="80">B</text><text x="225" y="80">C</text><text x="35" y="130">D</text><text x="115" y="130">E</text><text x="225" y="130">F</text>
+            </g>
+            <g font-family="Inter, sans-serif" font-size="10" fill="#234E3D" font-weight="600"><text x="172" y="14">level 0</text><text x="96" y="62">level 1</text><text x="246" y="72">level 1</text><text x="246" y="125">level 2</text></g>
+          </svg>
+          <figcaption>Order: <b>A → B → C → D → E → F</b></figcaption>
+        </figure>
+        <h4>Pseudocode</h4>
+<pre class="code" tabindex="0"><code>BFS(G, s):
+  create empty queue Q and visited set
+  mark s visited;  enqueue(Q, s)
+  while Q is not empty:
+      u ← dequeue(Q)            // front
+      visit(u)
+      for each neighbour v of u in G[u]:
+          if v not in visited:
+              mark v visited    // mark on enqueue
+              enqueue(Q, v)     // back</code></pre>
+        <h4>When is BFS useful?</h4>
+        <ul class="ticks"><li>Shortest path in an <b>unweighted</b> graph (fewest edges)</li><li>Level-order processing, "degrees of separation"</li><li>Finding every node within <i>k</i> hops</li></ul>
+        <p class="meta"><span>Time <b>O(V + E)</b></span><span>Aux. space <b>O(V)</b></span></p>
+      </article>
+
+      <article class="card algo-card reveal" id="cardDfs">
+        <header><span class="pill pill-coral">DFS</span><h3>Depth-First Search</h3></header>
+        <p>Follows one path <b>as deep as possible</b>, then <b>backtracks</b> to the most recent node that still has unexplored neighbours. It uses a <b>stack (LIFO)</b> (or recursion, which is the call stack).</p>
+        <figure class="mini">
+          <svg viewBox="0 0 300 150" role="img" aria-label="Example graph with DFS visiting order A B D E C F">
+            <g stroke="#CBBFA9" stroke-width="2.5"><line x1="150" y1="25" x2="75" y2="75"/><line x1="150" y1="25" x2="225" y2="75"/><line x1="75" y1="75" x2="35" y2="125"/><line x1="75" y1="75" x2="115" y2="125"/><line x1="225" y1="75" x2="225" y2="125"/></g>
+            <path d="M150 25 L75 75 L35 125" stroke="#F07862" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            <g font-family="Manrope, sans-serif" font-weight="800" font-size="13" text-anchor="middle" fill="#292D32" stroke="#234E3D" stroke-width="2">
+              <circle cx="150" cy="25" r="16" fill="#B9D7C0"/><circle cx="75" cy="75" r="16" fill="#B9D7C0"/><circle cx="225" cy="75" r="16" fill="#B9D7C0"/>
+              <circle cx="35" cy="125" r="16" fill="#F2B84B"/><circle cx="115" cy="125" r="16" fill="#B9D7C0"/><circle cx="225" cy="125" r="16" fill="#B9D7C0"/>
+            </g>
+            <g font-family="Manrope, sans-serif" font-weight="800" font-size="13" text-anchor="middle" fill="#292D32">
+              <text x="150" y="30">A</text><text x="75" y="80">B</text><text x="225" y="80">C</text><text x="35" y="130">D</text><text x="115" y="130">E</text><text x="225" y="130">F</text>
+            </g>
+            <g font-family="Inter, sans-serif" font-size="10" fill="#C9533E" font-weight="600"><text x="52" y="52">dive deep…</text><text x="140" y="143">…then backtrack</text></g>
+          </svg>
+          <figcaption>Order: <b>A → B → D → E → C → F</b></figcaption>
+        </figure>
+        <h4>Pseudocode</h4>
+<pre class="code" tabindex="0"><code>DFS(G, s):
+  create empty stack S and visited set
+  visit(s); mark s visited;  push(S, s)
+  while S is not empty:
+      u ← top(S)
+      if u has an unexplored neighbour v:
+          if v not in visited:
+              visit(v); mark v visited
+              push(S, v)        // go deeper
+      else:
+          pop(S)                // backtrack</code></pre>
+        <h4>When is DFS useful?</h4>
+        <ul class="ticks"><li><b>Cycle detection</b> and topological sorting</li><li>Maze solving and other backtracking problems</li><li>Finding connected / strongly connected components</li></ul>
+        <p class="meta"><span>Time <b>O(V + E)</b></span><span>Aux. space <b>O(V)</b></span></p>
+      </article>
+    </div>
+
+    <!-- interactive comparison -->
+    <div class="card compare-card reveal">
+      <div class="compare-head">
+        <h3>Compare them</h3>
+        <div class="segmented segmented-sm" role="group" aria-label="Choose a comparison topic" id="cmpTabs">
+          <button type="button" class="is-active" data-topic="structure" aria-pressed="true">Data structure</button>
+          <button type="button" data-topic="order" aria-pressed="false">Visit order</button>
+          <button type="button" data-topic="best" aria-pressed="false">Best for</button>
+          <button type="button" data-topic="memory" aria-pressed="false">Memory</button>
+        </div>
+      </div>
+      <div class="cmp-body" id="cmpBody" aria-live="polite"></div>
+    </div>
+
+    <div class="card cycle-card reveal">
+      <h3>How are cycles handled?</h3>
+      <div class="cycle-grid">
+        <p>A cycle (A → B → C → A) would make a naive traversal run forever. Both algorithms keep a <b>visited set</b>. Before using a neighbour they ask <em>"have I seen this node?"</em>. If yes, the edge is <b>skipped</b>, so every node is processed <b>exactly once</b> and the algorithm always stops. The playback panel shows these as "skip" steps.</p>
+        <svg viewBox="0 0 240 130" role="img" aria-label="Triangle graph where the edge back to A is skipped">
+          <g stroke="#CBBFA9" stroke-width="3"><line x1="120" y1="22" x2="45" y2="100"/><line x1="45" y1="100" x2="195" y2="100"/></g>
+          <line x1="195" y1="100" x2="120" y2="22" stroke="#F07862" stroke-width="3.5" stroke-dasharray="6 6"/>
+          <g font-family="Manrope, sans-serif" font-weight="800" font-size="14" text-anchor="middle" stroke="#234E3D" stroke-width="2">
+            <circle cx="120" cy="22" r="17" fill="#B9D7C0"/><circle cx="45" cy="100" r="17" fill="#B9D7C0"/><circle cx="195" cy="100" r="17" fill="#F2B84B"/>
+          </g>
+          <g font-family="Manrope, sans-serif" font-weight="800" font-size="14" text-anchor="middle" fill="#292D32"><text x="120" y="27">A</text><text x="45" y="105">B</text><text x="195" y="105">C</text></g>
+          <text x="172" y="52" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#C9533E">A already visited: skip</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ F. COMPLEXITY ============ -->
+<section class="section" id="complexity" aria-labelledby="cxTitle">
+  <div class="container">
+    <div class="section-head"><div>
+      <p class="eyebrow">Analysis</p>
+      <h2 id="cxTitle">Complexity analysis</h2>
+    </div></div>
+    <div class="cx-grid">
+      <div class="card reveal">
+        <h3>Theoretical bounds</h3>
+        <div class="table-wrap">
+          <table class="cx-table">
+            <thead><tr><th scope="col">Algorithm</th><th scope="col">Time complexity</th><th scope="col">Auxiliary space</th></tr></thead>
+            <tbody>
+              <tr data-algo="bfs"><th scope="row">BFS</th><td data-field="time">O(V + E)</td><td data-field="auxiliary_space">O(V)</td></tr>
+              <tr data-algo="dfs"><th scope="row">DFS</th><td data-field="time">O(V + E)</td><td data-field="auxiliary_space">O(V)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <dl class="defs">
+          <div><dt>V</dt><dd>number of <b>vertices</b> (nodes) in the graph</dd></div>
+          <div><dt>E</dt><dd>number of <b>edges</b> (connections) in the graph</dd></div>
+        </dl>
+      </div>
+      <div class="card reveal">
+        <h3>Theory vs. measured runtime</h3>
+        <p class="muted">Big-O describes how the work <b>grows</b> as the graph grows. It is not a stopwatch reading. A measured time depends on the computer, the language and the tiny size of the example.</p>
+        <div class="live-box" id="liveBox">
+          <div><span class="live-k">Your graph now</span><span class="live-v" id="liveVE">V = 0, E = 0</span></div>
+          <div><span class="live-k">Work bound V + E</span><span class="live-v" id="liveWork">0</span></div>
+          <div><span class="live-k">Last measured run</span><span class="live-v" id="liveRuntime">run a traversal</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="why-grid">
+      <div class="card why reveal"><h4>Why O(V + E) with an adjacency list?</h4><p>Every vertex is enqueued/pushed and removed <b>once</b> (V work). While processing a vertex we scan <b>only its own neighbour list</b>. All lists together hold E entries for a directed graph (2E for undirected), so edges cost O(E) in total. An adjacency <em>matrix</em> would need to scan a whole row of V cells for every vertex, giving O(V²).</p></div>
+      <div class="card why reveal"><h4>Why O(V) extra memory?</h4><p>The <b>visited</b> set remembers up to V nodes. The <b>queue</b> (BFS) or <b>stack</b> (DFS) can also hold up to V nodes at once in the worst case, for example a star graph for the BFS queue, or a long path for the DFS stack. The adjacency list itself is the <em>input</em>, so it is not counted as auxiliary space.</p></div>
+      <div class="card why reveal"><h4>Same bound, different shape</h4><p>BFS's memory peaks with the <b>widest level</b> of the graph, DFS's with the <b>deepest path</b>. Both are O(V) in the worst case, but on a wide, shallow graph DFS uses far less memory, and on a long path BFS does.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ G. ABOUT ============ -->
+<section class="section section-alt" id="about" aria-labelledby="aboutTitle">
+  <div class="container">
+    <div class="section-head"><div>
+      <p class="eyebrow">About this project</p>
+      <h2 id="aboutTitle">DAA concepts demonstrated</h2>
+    </div></div>
+    <div class="about-grid">
+      <div class="card reveal"><h4>Graph representation</h4><p>Adjacency list stored in Python, built in O(V + E). Neighbours are ordered deterministically.</p></div>
+      <div class="card reveal"><h4>Abstract data types</h4><p>A <b>queue</b> (<code>collections.deque</code>) powers BFS; a <b>stack</b> (a Python list) powers DFS.</p></div>
+      <div class="card reveal"><h4>Correctness</h4><p>Each node is visited exactly once thanks to the visited set. Cycles and disconnected graphs terminate safely.</p></div>
+      <div class="card reveal"><h4>Asymptotic analysis</h4><p>Time O(V + E), auxiliary space O(V), with the reasons shown on this page and in the README.</p></div>
+      <div class="card reveal"><h4>Client-server design</h4><p>The browser sends the graph as JSON to a Flask REST API. The <b>backend is the single source of truth</b>. The browser only replays the steps it returns.</p></div>
+      <div class="card reveal"><h4>Testing</h4><p>Automated pytest suites check traversal orders, FIFO/LIFO behaviour, cycles, disconnected graphs and API errors.</p></div>
+    </div>
+    <div class="card arch reveal">
+      <h3>How the pieces talk</h3>
+      <div class="arch-flow" role="img" aria-label="Browser to Flask API to algorithms and back">
+        <div><b>Browser</b><span>HTML · CSS · JS · SVG</span></div>
+        <i aria-hidden="true">⇄ JSON / fetch</i>
+        <div><b>Flask REST API</b><span>routes.py · validation</span></div>
+        <i aria-hidden="true">→</i>
+        <div><b>algorithms.py</b><span>BFS · DFS · step trace</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <p><b>Graph Traversal Visualizer</b> · A Design &amp; Analysis of Algorithms implementation project · Python · Flask · Vanilla JS · SVG</p>
+  </div>
+</footer>
+
+<script src="/static/js/api.js"></script>
+<script src="/static/js/graph-renderer.js"></script>
+<script src="/static/js/playback.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>
