@@ -2,6 +2,8 @@
 
 An interactive learning platform for the **Design and Analysis of Algorithms (DAA)** that shows how **Breadth-First Search (BFS)** and **Depth-First Search (DFS)** explore a graph, one step at a time.
 
+This Project is done by Sri Sai Surya Vishwak Gadepally(92400118494) and Pulicheri Sushanth(92400118445).
+
 You build a graph in the browser, pick an algorithm and a start node, and press **Run traversal**. The browser sends the graph to a **Flask REST API**. The **Python backend runs the real algorithm**, records every step, and returns the steps as JSON. The browser then replays them, with forward, backward, play and pause, on an SVG canvas.
 
 > **Important design rule:** there is **no BFS or DFS code in JavaScript**. Python is the single source of truth; the frontend only draws what the API returns.
